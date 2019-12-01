@@ -14,8 +14,11 @@
 
         static void OnGameLoad()
         {
-            Game.Print("14 Senna Load");
-            Senna.OnLoad();
+            if (ObjectManager.Player.CharacterName == "Senna")
+            {
+                Game.Print("14 Senna Load");
+                Senna.OnLoad();
+            }
         }
     }
 }

@@ -83,6 +83,7 @@ namespace _14Senna
             //Combo Menu
 
             ComboMenu = new Menu("Combo", "Combo Setting");
+            ComboMenu.Add(new MenuBool("AAreset", "Reset AA after Q"));
             ComboMenu.Add(new MenuBool("QAA", "Only Q After AA"));
             ComboMenu.Add(new MenuBool("UseQCombo", "Use Q"));
             ComboMenu.Add(new MenuBool("UseWCombo", "Use W"));
@@ -144,7 +145,10 @@ namespace _14Senna
                     {
                         Q1.CastOnUnit(args.Target, true);
                         lastQ = Game.Time;
-                        //Orbwalker.ResetAutoAttackTimer();
+                        if (ComboMenu["AAreset"].GetValue<MenuBool>().Enabled)
+                        {
+                            Orbwalker.ResetAutoAttackTimer();
+                        }
                         //Console.WriteLine(" ComboQ "+lastQ);
                         //Game.Print(" ComboQ " + lastQ);
                         return;
@@ -212,6 +216,10 @@ namespace _14Senna
                 {
                     Q1.CastOnUnit(target, true);
                     lastQ = Game.Time;
+                    if (ComboMenu["AAreset"].GetValue<MenuBool>().Enabled)
+                    {
+                        Orbwalker.ResetAutoAttackTimer();
+                    }
                     //Console.WriteLine(" ComboQ "+lastQ);
                     //Game.Print(" ComboQ " + lastQ);
                     return;
@@ -336,13 +344,14 @@ namespace _14Senna
             if (KSMenu["RKS"].GetValue<MenuBool>().Enabled && lastR + 2 < Game.Time && R.IsReady())
             {
                 var heros = GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(KSMenu["MaxR"].GetValue<MenuSlider>().Value) && x.Health <= GetRDmg(x)).ToArray();
-
+                
                 if (heros.Any())
                 {
                     foreach (var target in heros)
                     {
-                        if (target.Position.DistanceToPlayer() < KSMenu["MinR"].GetValue<MenuSlider>().Value)
+                        if (target.Position.DistanceToPlayer() > KSMenu["MinR"].GetValue<MenuSlider>().Value)
                         {
+
                             var rPred = R.GetPrediction(target, false, 0, CollisionObjects.Heroes | CollisionObjects.YasuoWall);
                             if (rPred.Hitchance >= HitChance.High)
                             {
@@ -491,7 +500,7 @@ namespace _14Senna
             //Game.Print("Dmg " + baseDmg + " bonusDmg " + bonusDmg + " passiveDMG " + passiveDmg);
             //Game.Print("bonusDmg " + bonusDmg);
             //Game.Print("passiveDMG " + passiveDmg);
-            //Game.Print("Qdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
+            Game.Print("Qdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
             //Game.Print("MyQdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
 
 

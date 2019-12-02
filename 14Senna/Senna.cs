@@ -473,7 +473,7 @@ namespace _14Senna
             //Game.Print("bonusDmg " + bonusDmg);
             //Game.Print("passiveDMG " + passiveDmg);
             //Game.Print("Qdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
-            Game.Print("MyQdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
+            //Game.Print("MyQdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
 
 
             return CalPhysicalDamage(ObjectManager.Player, target, (float)value);

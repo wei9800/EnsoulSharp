@@ -403,8 +403,10 @@ namespace _14Senna
                                 }
 
                             }
-                            else if(KSMenu["WardQKS"].GetValue<MenuBool>().Enabled)
+
+                            if(KSMenu["WardQKS"].GetValue<MenuBool>().Enabled)
                             {
+                                //Game.Print("Wd KS");
                                 var pos = ObjectManager.Player.Position.Extend(target.Position, 500);
 
                                 if (ObjectManager.Player.CanUseItem(ward.Id)) {
@@ -485,7 +487,7 @@ namespace _14Senna
             //Game.Print("Rdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
             //Game.Print("Rdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
 
-            return CalPhysicalDamage(ObjectManager.Player, target, (float)value);
+            return Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value);
         }
 
         static double GetQDmg(AIHeroClient target)
@@ -500,11 +502,11 @@ namespace _14Senna
             //Game.Print("Dmg " + baseDmg + " bonusDmg " + bonusDmg + " passiveDMG " + passiveDmg);
             //Game.Print("bonusDmg " + bonusDmg);
             //Game.Print("passiveDMG " + passiveDmg);
-            Game.Print("Qdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
+            //Game.Print("Qdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
             //Game.Print("MyQdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
 
 
-            return CalPhysicalDamage(ObjectManager.Player, target, (float)value);
+            return Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value);
         }
 
         static double GetWDmg(AIHeroClient target)

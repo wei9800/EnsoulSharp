@@ -83,6 +83,7 @@ namespace _14Senna
             //Combo Menu
 
             ComboMenu = new Menu("Combo", "Combo Setting");
+            ComboMenu.Add(new MenuBool("QAA", "Only Q After AA"));
             ComboMenu.Add(new MenuBool("UseQCombo", "Use Q"));
             ComboMenu.Add(new MenuBool("UseWCombo", "Use W"));
             tyMenu.Add(ComboMenu);
@@ -126,10 +127,31 @@ namespace _14Senna
                 }
             }
 
+            Orbwalker.OnAction += OnOrbwalkerAction;
             Game.OnUpdate += Tick;
             Drawing.OnDraw += OnDraw;
             AIBaseClient.OnProcessSpellCast += OnProcessSpellCast;
             Teleport.OnTeleport +=OnTP;
+        }
+
+        static void OnOrbwalkerAction(object obj, OrbwalkerActionArgs args)
+        {
+            if (args.Type == OrbwalkerType.AfterAttack && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
+            {
+                if (ComboMenu["UseQCombo"].GetValue<MenuBool>().Enabled && ComboMenu["QAA"].GetValue<MenuBool>().Enabled && lastQ + 0.5 < Game.Time && Q1.IsReady())
+                {
+                    if (args.Target != null && args.Target.Type == GameObjectType.AIHeroClient)
+                    {
+                        Q1.CastOnUnit(args.Target, true);
+                        lastQ = Game.Time;
+                        //Orbwalker.ResetAutoAttackTimer();
+                        //Console.WriteLine(" ComboQ "+lastQ);
+                        //Game.Print(" ComboQ " + lastQ);
+                        return;
+                    }
+                }
+
+            }
         }
 
         static void OnDraw(EventArgs args)
@@ -177,16 +199,12 @@ namespace _14Senna
 
             BaseUlt();
             KS();
-            var target = TargetSelector.GetTarget(Q1.Range, DamageType.Physical);
-
-            //Game.Print(GetWDmg(target));
-
         }
 
         static void Combo()
         {
 
-            if (ComboMenu["UseQCombo"].GetValue<MenuBool>().Enabled && lastQ + 0.5 < Game.Time && Q1.IsReady())
+            if (ComboMenu["UseQCombo"].GetValue<MenuBool>().Enabled && !ComboMenu["QAA"].GetValue<MenuBool>().Enabled && lastQ + 0.5 < Game.Time && Q1.IsReady())
             {
                 var target = TargetSelector.GetTarget(Q1.Range, DamageType.Physical);
 
@@ -315,6 +333,31 @@ namespace _14Senna
 
         static void KS()
         {
+            if (KSMenu["RKS"].GetValue<MenuBool>().Enabled && lastR + 2 < Game.Time && R.IsReady())
+            {
+                var heros = GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(KSMenu["MaxR"].GetValue<MenuSlider>().Value) && x.Health <= GetRDmg(x)).ToArray();
+
+                if (heros.Any())
+                {
+                    foreach (var target in heros)
+                    {
+                        if (target.Position.DistanceToPlayer() < KSMenu["MinR"].GetValue<MenuSlider>().Value)
+                        {
+                            var rPred = R.GetPrediction(target, false, 0, CollisionObjects.Heroes | CollisionObjects.YasuoWall);
+                            if (rPred.Hitchance >= HitChance.High)
+                            {
+                                R.Cast(rPred.CastPosition);
+                                lastR = Game.Time;
+                                //Console.WriteLine(" HarassW " + lastW);
+                                //Game.Print(" HarassW " + lastW);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+
             if (KSMenu["QKS"].GetValue<MenuBool>().Enabled && lastQ + 0.5 < Game.Time && Q2.IsReady())
             {
                 var heros = GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(Q2.Range) && x.Health <= GetQDmg(x)).ToArray();
@@ -345,7 +388,7 @@ namespace _14Senna
                                         Q2.CastOnUnit(minion, true);
                                         lastQ = Game.Time;
                                         //Console.WriteLine(" HarassQ " + lastQ);
-                                        Game.Print(" KSQ " + lastQ);
+                                       // Game.Print(" KSQ " + lastQ);
                                         return;
                                     }
                                 }
@@ -369,32 +412,6 @@ namespace _14Senna
                 }
 
             }
-
-            if (KSMenu["RKS"].GetValue<MenuBool>().Enabled && lastR + 2 < Game.Time && R.IsReady())
-            {
-                var heros = GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(KSMenu["MinR"].GetValue<MenuSlider>().Value) && x.Health <= GetRDmg(x)).ToArray();
-
-                if (heros.Any())
-                {
-                    foreach (var target in heros)
-                    {
-                        if (target.Position.DistanceToPlayer() > KSMenu["MaxR"].GetValue<MenuSlider>().Value)
-                        {
-                            var rPred = R.GetPrediction(target, false, 0, CollisionObjects.Heroes | CollisionObjects.YasuoWall);
-                            if (rPred.Hitchance >= HitChance.High)
-                            {
-                                R.Cast(rPred.CastPosition);
-                                lastR = Game.Time;
-                                //Console.WriteLine(" HarassW " + lastW);
-                                //Game.Print(" HarassW " + lastW);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
-
         }
 
 
@@ -448,14 +465,16 @@ namespace _14Senna
         }
         static double GetRDmg(AIHeroClient target)
         {
+            //Game.Print("getRdmg");
             if (R.Level == 0) { return 0; };
 
             var baseDmg = new float[]{ 250, 375, 500 }[R.Level-1];
             var bonusDmg = ObjectManager.Player.FlatPhysicalDamageMod;
             var bonusAP = ObjectManager.Player.FlatMagicDamageMod * 0.7f;
 
-            var value = baseDmg + bonusAP + bonusAP;
+            var value = baseDmg + bonusDmg + bonusAP;
             //Game.Print("Rdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
+            //Game.Print("Rdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
 
             return CalPhysicalDamage(ObjectManager.Player, target, (float)value);
         }

@@ -473,7 +473,7 @@ namespace _14Senna
             //Game.Print("bonusDmg " + bonusDmg);
             //Game.Print("passiveDMG " + passiveDmg);
             //Game.Print("Qdmg: " + Damage.CalculatePhysicalDamage(ObjectManager.Player, target, value));
-            //Game.Print("MyQdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
+            Game.Print("MyQdmg: " + CalPhysicalDamage(ObjectManager.Player, target, (float)value));
 
 
             return CalPhysicalDamage(ObjectManager.Player, target, (float)value);
@@ -494,11 +494,8 @@ namespace _14Senna
         static double CalPhysicalDamage(AIHeroClient source, AIHeroClient target, float amount)
         {
             var armorPenetrationPercent = source.PercentArmorPenetrationMod; 
-             var armorPenetrationFlat = source.FlatArmorPenetrationMod * (0.6 + 0.4 * source.Level/18);
+             var armorPenetrationFlat = (source.FlatArmorPenetrationMod+source.PhysicalLethality) * (0.6 + 0.4 * source.Level/18);
             var bonusArmorPenetrationMod = source.PercentBonusArmorPenetrationMod;
-
-            //Game.Print("FlatArmorPenetrationMod " + ObjectManager.Player.FlatArmorPenetrationMod);
-            //Game.Print(ObjectManager.Player.PercentBonusArmorPenetrationMod);
 
             var armor = target.Armor;
             var bonusArmor = target.BonusArmor;
